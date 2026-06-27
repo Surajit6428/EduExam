@@ -6,6 +6,7 @@ import {
   CalendarCheck,
   BookOpen,
   Trophy,
+  User,
 } from "lucide-react";
 
 const menus = [
@@ -38,6 +39,11 @@ const menus = [
     name: "Results",
     href: "/teacher/results",
     icon: Trophy,
+  },
+  {
+    name: "Profile",
+    href: "/student/profile",
+    icon: User,
   },
 ];
 
