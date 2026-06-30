@@ -3,16 +3,17 @@
 import { useState } from "react";
 
 export default function LoginPage() {
-  const [login, setLogin] =
-    useState("");
+  const [login, setLogin] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const [password, setPassword] =
-    useState("");
+  const handleLogin = async (
+    e?: React.FormEvent
+  ) => {
+    if (e) {
+      e.preventDefault();
+    }
 
-  const [loading, setLoading] =
-    useState(false);
-
-  const handleLogin = async () => {
     try {
       setLoading(true);
 
@@ -38,39 +39,32 @@ export default function LoginPage() {
         return;
       }
 
-      alert(
-        `Welcome ${data.name}`
-      );
+      alert(`Welcome ${data.name}`);
 
-      if (
-        data.role === "ADMIN"
-      ) {
-        window.location.href =
-          "/admin/dashboard";
-      }
+      switch (data.role) {
+        case "ADMIN":
+          window.location.href =
+            "/admin/dashboard";
+          break;
 
-      if (
-        data.role === "TEACHER"
-      ) {
-        window.location.href =
-          "/teacher/dashboard";
-      }
+        case "TEACHER":
+          window.location.href =
+            "/teacher/dashboard";
+          break;
 
-      if (
-        data.role === "STUDENT"
-      ) {
-        window.location.href =
-          "/student/dashboard";
-      }
+        case "STUDENT":
+          window.location.href =
+            "/student/dashboard";
+          break;
 
-      if (
-        data.role === "PARENT"
-      ) {
-        window.location.href =
-          "/parent/dashboard";
+        case "PARENT":
+          window.location.href =
+            "/parent/dashboard";
+          break;
       }
     } catch (error) {
       console.log(error);
+      alert("Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -78,48 +72,52 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center">
-      <div className="w-full max-w-md rounded-xl border p-6">
+      <div className="w-full max-w-md rounded-xl border p-6 shadow">
+
         <h1 className="mb-6 text-center text-3xl font-bold">
           Login
         </h1>
 
-        <input
-          value={login}
-          onChange={(e) =>
-            setLogin(
-              e.target.value
-            )
-          }
-          className="mb-4 w-full rounded border p-3"
-          placeholder="Email or Mobile"
-        />
-
-        <input
-          type="password"
-          value={password}
-          onChange={(e) =>
-            setPassword(
-              e.target.value
-            )
-          }
-          className="mb-4 w-full rounded border p-3"
-          placeholder="Password"
-        />
-
-        <button
-          onClick={
-            handleLogin
-          }
-          className="w-full rounded bg-black p-3 text-white"
+        <form
+          onSubmit={handleLogin}
+          className="space-y-4"
         >
-          {loading
-            ? "Please Wait..."
-            : "Login"}
-        </button>
+          <input
+            type="text"
+            value={login}
+            onChange={(e) =>
+              setLogin(e.target.value)
+            }
+            className="w-full rounded border p-3"
+            placeholder="Email or Mobile"
+            autoFocus
+          />
 
-        <p className="mt-4 text-center text-sm">
+          <input
+            type="password"
+            value={password}
+            onChange={(e) =>
+              setPassword(e.target.value)
+            }
+            className="w-full rounded border p-3"
+            placeholder="Password"
+          />
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded bg-black p-3 text-white disabled:opacity-50"
+          >
+            {loading
+              ? "Please Wait..."
+              : "Login"}
+          </button>
+        </form>
+
+        <p className="mt-4 text-center text-sm text-gray-500">
           Developed By SB Designer
         </p>
+
       </div>
     </div>
   );

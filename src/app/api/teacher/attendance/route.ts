@@ -8,54 +8,50 @@ export async function POST(req: Request) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // আজকের কোনো attendance আগে থেকেই আছে কিনা
-    const existingAttendance =
-      await prisma.attendance.findFirst({
-        where: {
-          date: today,
-        },
-      });
-
-    if (existingAttendance) {
-      return NextResponse.json(
-        {
-          success: false,
-          message:
-            "Attendance has already been taken for today.",
-        },
-        {
-          status: 400,
-        }
-      );
-    }
-
-    // Save Attendance
     for (const studentId in attendance) {
-      await prisma.attendance.create({
-        data: {
-          studentId,
-          status: attendance[studentId],
-          date: today,
-        },
-      });
+      const existing =
+        await prisma.attendance.findFirst({
+          where: {
+            studentId,
+            date: today,
+          },
+        });
+
+      if (existing) {
+        await prisma.attendance.update({
+          where: {
+            id: existing.id,
+          },
+          data: {
+            status:
+              attendance[studentId],
+          },
+        });
+      } else {
+        await prisma.attendance.create({
+          data: {
+            studentId,
+            status:
+              attendance[studentId],
+            date: today,
+          },
+        });
+      }
     }
 
     return NextResponse.json({
       success: true,
       message:
-        "Attendance saved successfully.",
+        "Attendance Updated Successfully",
     });
   } catch (error) {
-    console.log(
-      "ATTENDANCE ERROR:",
-      error
-    );
+    console.log(error);
 
     return NextResponse.json(
       {
         success: false,
         message:
-          "Something went wrong.",
+          "Something went wrong",
       },
       {
         status: 500,

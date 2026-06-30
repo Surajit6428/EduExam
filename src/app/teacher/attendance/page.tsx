@@ -129,9 +129,10 @@ export default async function TeacherAttendancePage() {
 
       </div>
 
-      <AttendanceForm
-        students={students}
-      />
+    <AttendanceForm
+  students={students}
+  existingAttendance={todayRecords}
+/>
 
     </div>
   );

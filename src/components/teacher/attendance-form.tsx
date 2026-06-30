@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface Student {
   id: string;
@@ -9,21 +10,42 @@ interface Student {
   email: string;
 }
 
+interface AttendanceRecord {
+  studentId: string;
+  status: "PRESENT" | "ABSENT";
+}
+
+interface Props {
+  students: Student[];
+  existingAttendance: AttendanceRecord[];
+}
+
 export default function AttendanceForm({
   students,
-}: {
-  students: Student[];
-}) {
+  existingAttendance,
+}: Props) {
+  const router = useRouter();
+
   const [attendance, setAttendance] =
     useState<
-      Record<
-        string,
-        "PRESENT" | "ABSENT"
-      >
+      Record<string, "PRESENT" | "ABSENT">
     >({});
 
   const [loading, setLoading] =
     useState(false);
+
+  useEffect(() => {
+    const data: Record<
+      string,
+      "PRESENT" | "ABSENT"
+    > = {};
+
+    existingAttendance.forEach((item) => {
+      data[item.studentId] = item.status;
+    });
+
+    setAttendance(data);
+  }, [existingAttendance]);
 
   const handleChange = (
     studentId: string,
@@ -57,30 +79,27 @@ export default function AttendanceForm({
         await res.json();
 
       if (!res.ok) {
-        alert(
-          data.message ||
-            "Failed"
-        );
-
+        alert(data.message);
         setLoading(false);
         return;
       }
 
-      alert(
-        "Attendance Saved Successfully"
-      );
+      alert(data.message);
 
-      setAttendance({});
+      router.refresh();
     } catch (error) {
       console.log(error);
 
       alert(
-        "Something went wrong"
+        "Something went wrong."
       );
     }
 
     setLoading(false);
   };
+
+  const isUpdate =
+    existingAttendance.length > 0;
 
   return (
     <div className="rounded-2xl border bg-white shadow">
@@ -113,63 +132,58 @@ export default function AttendanceForm({
 
         <tbody>
 
-          {students.map(
-            (student) => (
-              <tr
-                key={student.id}
-                className="border-t"
-              >
+          {students.map((student) => (
+            <tr
+              key={student.id}
+              className="border-t"
+            >
+              <td className="p-4">
+                {student.firstName}{" "}
+                {student.lastName}
+              </td>
 
-                <td className="p-4">
-                  {student.firstName}{" "}
-                  {student.lastName}
-                </td>
+              <td className="p-4">
+                {student.email}
+              </td>
 
-                <td className="p-4">
-                  {student.email}
-                </td>
-
-                <td className="p-4 text-center">
-                  <input
-                    type="radio"
-                    name={student.id}
-                    checked={
-                      attendance[
-                        student.id
-                      ] ===
+              <td className="p-4 text-center">
+                <input
+                  type="radio"
+                  name={student.id}
+                  checked={
+                    attendance[
+                      student.id
+                    ] === "PRESENT"
+                  }
+                  onChange={() =>
+                    handleChange(
+                      student.id,
                       "PRESENT"
-                    }
-                    onChange={() =>
-                      handleChange(
-                        student.id,
-                        "PRESENT"
-                      )
-                    }
-                  />
-                </td>
+                    )
+                  }
+                />
+              </td>
 
-                <td className="p-4 text-center">
-                  <input
-                    type="radio"
-                    name={student.id}
-                    checked={
-                      attendance[
-                        student.id
-                      ] ===
+              <td className="p-4 text-center">
+                <input
+                  type="radio"
+                  name={student.id}
+                  checked={
+                    attendance[
+                      student.id
+                    ] === "ABSENT"
+                  }
+                  onChange={() =>
+                    handleChange(
+                      student.id,
                       "ABSENT"
-                    }
-                    onChange={() =>
-                      handleChange(
-                        student.id,
-                        "ABSENT"
-                      )
-                    }
-                  />
-                </td>
+                    )
+                  }
+                />
+              </td>
 
-              </tr>
-            )
-          )}
+            </tr>
+          ))}
 
         </tbody>
 
@@ -178,14 +192,14 @@ export default function AttendanceForm({
       <div className="p-6">
 
         <button
-          onClick={
-            handleSubmit
-          }
+          onClick={handleSubmit}
           disabled={loading}
-          className="rounded-xl bg-blue-600 px-6 py-3 text-white disabled:bg-gray-400"
+          className="rounded-xl bg-blue-600 px-6 py-3 text-white"
         >
           {loading
             ? "Saving..."
+            : isUpdate
+            ? "Update Attendance"
             : "Save Attendance"}
         </button>
 

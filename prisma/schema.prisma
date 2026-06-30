@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url= env("DATABASE_URL")
+  url      = env("DATABASE_URL")
 }
 
 enum UserRole {
@@ -20,40 +20,42 @@ enum AccountStatus {
   BLOCKED
   SUSPENDED
 }
+
 enum AttendanceStatus {
   PRESENT
   ABSENT
 }
 
 model User {
-  id          String        @id @default(cuid())
-  uniqueId    String        @unique
+  id       String @id @default(cuid())
+  uniqueId String @unique
 
-  firstName   String
-  middleName  String?
-  lastName    String
+  firstName  String
+  middleName String?
+  lastName   String
 
-  email       String        @unique
-  mobile      String        @unique
+  email  String @unique
+  mobile String @unique
 
-  gender      String
-  dob         DateTime
-  address     String
+  gender  String
+  dob     DateTime
+  address String
 
-  password    String
+  password String
 
-  role        UserRole
-  status      AccountStatus @default(PENDING)
+  role   UserRole
+  status AccountStatus @default(PENDING)
 
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  student      Student?
-  teacher      Teacher?
-  parent       Parent?
+  student Student?
+  teacher Teacher?
+  parent  Parent?
 
-  quizAttempts QuizAttempt[]
-  attendances  Attendance[]
+  quizAttempts          QuizAttempt[]
+  attendances           Attendance[]
+  assignmentSubmissions AssignmentSubmission[]
 
   @@index([email])
   @@index([mobile])
@@ -61,114 +63,135 @@ model User {
 }
 
 model Student {
-  id          String   @id @default(cuid())
-  userId      String   @unique
+  id     String @id @default(cuid())
+  userId String @unique
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Teacher {
-  id             String   @id @default(cuid())
-  userId         String   @unique
+  id     String @id @default(cuid())
+  userId String @unique
 
   qualification  String?
   specialization String?
   experience     Int?
 
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Parent {
-  id          String   @id @default(cuid())
-  userId      String   @unique
+  id     String @id @default(cuid())
+  userId String @unique
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Batch {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  createdAt   DateTime @default(now())
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
 }
 
 model Quiz {
-  id          String   @id @default(cuid())
+  id String @id @default(cuid())
 
   title       String
   description String?
 
-  questions   Question[]
-  attempts    QuizAttempt[]
+  questions Question[]
+  attempts  QuizAttempt[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
+
 model Assignment {
-  id          String   @id @default(cuid())
+  id String @id @default(cuid())
 
   title       String
   description String?
 
-  dueDate     DateTime
+  dueDate DateTime
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  submissions AssignmentSubmission[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Attendance {
-  id          String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  studentId   String
+  studentId String
 
-  student     User @relation(fields: [studentId],references: [id],onDelete: Cascade)
+  student User @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
-  date        DateTime
+  date DateTime
 
-  status      AttendanceStatus
+  status AttendanceStatus
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@unique([studentId, date])
 }
 
 model Question {
-  id            String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  quizId        String
+  quizId String
 
-  quiz Quiz @relation(fields: [quizId],references: [id],onDelete: Cascade )
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
 
-  question      String
+  question String
 
-  optionA       String
-  optionB       String
-  optionC       String
-  optionD       String
+  optionA String
+  optionB String
+  optionC String
+  optionD String
 
   correctAnswer String
 
-  createdAt     DateTime @default(now())
+  createdAt DateTime @default(now())
 }
+
 model QuizAttempt {
-  id          String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  quizId      String
-  studentId   String
+  quizId    String
+  studentId String
 
-  quiz        Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
 
-  student     User @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  student User @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
-  score       Int @default(0)
+  score Int @default(0)
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
+}
+
+model AssignmentSubmission {
+  id String @id @default(cuid())
+
+  assignmentId String
+  studentId    String
+
+  assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  student    User       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  fileUrl String
+
+  marks    Int?
+  feedback String?
+
+  submittedAt DateTime @default(now())
 }
